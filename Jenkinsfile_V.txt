@@ -1,0 +1,71 @@
+pipeline{
+
+agent any
+
+tools{
+maven 'maven 3.6.2'
+}
+
+triggers{
+//pollSCM
+}
+
+options{
+timestamps()
+}
+
+stages{
+stage('CheckoutCode'){
+steps{
+git branch: 'development', credentialsId: '3867b358-d9fa-477d-b770-9f90a4914878', url: 'https://github.com/vinesh6777/maven-web-application.git'
+}
+}
+
+stage('BuildingTheArtifact'){
+steps{
+sh "mvn clean package"
+}
+}
+
+stage('SonarQubeReport'){
+steps{
+sh "mvn clean sonar:sonar"
+}
+}
+
+stage('StoringInArtifact'){
+steps{
+sh "mvn clean deploy"
+}
+}
+
+stage('DeployingInToTomcat'){
+steps{
+sshagent(['1e0d4a94-93cb-4998-9810-e40c43002118']) {
+    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.74.55:/opt/apache-tomcat-9.0.64/webapps/" 
+}
+}
+}
+
+}
+post{
+success{
+emailext body: '''Build over.... Decelerative...Build Success
+
+Regards,
+P2protechnology, 9441893491, Hyderabad.''', subject: 'Build over.... Decelerative...Build Success', to: 'p2protech@gmail.com'
+}
+failure{
+emailext body: '''Build over.... Decelerative...Build Failure
+
+Regards,
+P2protechnology, 9441893491, Hyderabad.''', subject: 'Build over.... Decelerative...Build Failure', to: 'p2protech@gmail.com'
+}
+always{
+emailext body: '''Build over.... Decelerative...Build Trigerred
+
+Regards,
+P2protechnology, 9441893491, Hyderabad.''', subject: 'Build over.... Decelerative...Build Trigerred', to: 'p2protech@gmail.com'
+}
+}
+}
