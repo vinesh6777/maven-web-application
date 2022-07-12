@@ -6,9 +6,9 @@ tools{
 maven 'maven 3.6.2'
 }
 
-triggers{
+//triggers{
 //pollSCM
-}
+//}
 
 options{
 timestamps()
